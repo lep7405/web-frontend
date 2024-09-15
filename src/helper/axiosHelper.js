@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 const axiosClient = axios.create({
  
@@ -17,22 +18,30 @@ axiosClient.interceptors.response.use(
     return response;
   },
   async (error) => {
+    // const navigate=useNavigate()
     const { response } = error;
+    console.log("hello")
     // Kiểm tra nếu response trả về mã lỗi 401 Unauthorized
-    if (response && response.status === 401) {
+    if (response && response.status === 404) {
       // Thực hiện refresh token
-      const res = await axios.get("http://localhost:5001/user/refreshToken",{
+      const res = await axios.get("http://localhost:8090/user/refreshToken",{
         headers:{
           Authorization: `Bearer ${localStorage.getItem('refreshToken')}`
         }
       });
+      // if(res.status===404){
+      //   // navigate("/login")
+      //   localStorage.clear("token");
+      //   localStorage.clear("refreshToken");
+      //   localStorage.clear("id");
+      // }
       console.log(res)
-      if (res.data.newToken) {
+      if (res.data.userDTO.token) {
         // Nếu refresh token thành công, cập nhật lại access token và thử gửi lại request gốc
-        localStorage.setItem('token',res.data.newToken);
-        localStorage.setItem('refreshToken', res.data.newRefreshToken);
+        localStorage.setItem('token',res.data.userDTO.token);
+        localStorage.setItem('refreshToken', res.data.userDTO.refreshToken);
         const originalRequest = error.config;
-        originalRequest.headers.Authorization = `Bearer ${res.data.newToken}`;
+        originalRequest.headers.Authorization = 'Bearer ' + res.data.userDTO.token
         return axios(originalRequest);
       } else {
         // Nếu refresh token không thành công, xử lý tại đây (ví dụ: đăng xuất người dùng, đưa họ về trang đăng nhập)

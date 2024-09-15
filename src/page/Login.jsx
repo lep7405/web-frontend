@@ -1,20 +1,21 @@
-import FingerprintJS from "@fingerprintjs/fingerprintjs";
+
 import axios from "axios";
 import { useFormik } from "formik";
 import { useState } from "react";
 import { Bounce, toast } from "react-toastify";
 import * as Yup from "yup";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { login} from "../Redux/AuthSlice";
+import useDeviceFingerprint from "../helper/useDeviceFingerprint";
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [visitorId, setVisitorId] = useState("");
-  const [combinedComponents, setCombinedComponents] = useState("");
   const [opentErrorAxios, setOpenErrorAxios] = useState(false);
   const [opentErrorAxiosText, setOpenErrorAxiosText] = useState();
+
+  const { visitorId } = useDeviceFingerprint();
+    
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -29,19 +30,20 @@ const Login = () => {
     }),
     onSubmit: async (values) => {
       console.log(values);
-      await axios.get(
-        `http://localhost:8090/sso/save/fingerprint/${visitorId}`
-      );
+      const data = {
+        deviceId: visitorId,
+        user: values,
+      };
       axios
-        .post("http://localhost:8090/sso/login", values)
+        .post("http://localhost:8090/user/Login", data)
         .then((res) => {
           console.log(res);
-          localStorage.setItem("email", res.data.email);
-          localStorage.setItem("id", res.data.id);
-          localStorage.setItem("token", res.data.token);
-          localStorage.setItem("refreshToken", res.data.refreshToken);
+          localStorage.setItem("email", res.data.userDTO.email);
+          localStorage.setItem("id", res.data.userDTO.id);
+          localStorage.setItem("token", res.data.userDTO.token);
+          localStorage.setItem("refreshToken", res.data.userDTO.refreshToken);
           dispatch(login());
-          navigate("/home");
+          navigate("/");
         })
         .catch((err) => {
           console.log(err);
@@ -49,7 +51,7 @@ const Login = () => {
             // Nếu có phản hồi từ máy chủ, hiển thị lỗi từ máy chủ
             setOpenErrorAxios(true);
 
-            setOpenErrorAxiosText(err.response.data.textResponse);
+            setOpenErrorAxiosText(err.response.data.message);
             setTimeout(() => {
               setOpenErrorAxios(false);
             }, 3000);
@@ -95,27 +97,7 @@ const Login = () => {
   });
 
   // Làm một tìm hợp thư viện đặc tiên
-  const getDeviceFingerprint = async () => {
-    try {
-      // Initialize FingerprintJS
-      const fp = await FingerprintJS.load();
-      const result = await fp.get();
 
-      // Dấu vân tay thiết bị
-      const { visitorId, components } = result;
-      setVisitorId(visitorId);
-
-      // Tạo chuỗi kết hợp từ các giá trị của các thành phần
-      const combinedString = Object.values(components)
-        .map((component) => JSON.stringify(component.value))
-        .join("");
-      setCombinedComponents(combinedString);
-    } catch (error) {
-      console.error("Error fetching fingerprint:", error);
-    }
-  };
-  getDeviceFingerprint();
-  console.log(visitorId);
   const handleGoogleSignUp = async () => {
     try {
       // Gửi fingerprint đến server
@@ -146,7 +128,7 @@ const Login = () => {
               name="email"
               value={formik.email}
               onChange={formik.handleChange}
-              className="w-full max-w-[100%] p-3 rounded-lg"
+              className="w-full max-w-[100%] p-3 rounded-lg bg-gray-300"
             />
             {formik.errors && formik.errors.email && (
               <div className="text-red-500">{formik.errors.email}</div>
@@ -160,7 +142,7 @@ const Login = () => {
               name="password"
               value={formik.password}
               onChange={formik.handleChange}
-              className="w-full max-w-[100%] p-3 rounded-lg"
+              className="w-full max-w-[100%] p-3 rounded-lg bg-gray-300"
             />
 
             {formik.errors && formik.errors.password && (

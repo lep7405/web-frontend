@@ -43,11 +43,11 @@ const Register = () => {
     }),
     onSubmit: async (values) => {
       console.log(values);
-      await axios.get(
-        `http://localhost:8090/sso/save/fingerprint/${visitorId}`
-      );
+      // await axios.get(
+      //   `http://localhost:8090/sso/save/fingerprint/${visitorId}`
+      // );
       axios
-        .post("http://localhost:8090/sso/Register", values)
+        .post("http://localhost:8090/user/Register", values)
         .then((res) => {
           console.log(res);
           navigate("/login")
@@ -155,7 +155,7 @@ const Register = () => {
               name="email"
               value={formik.email}
               onChange={formik.handleChange}
-              className="w-full max-w-[100%] p-3 rounded-lg"
+              className="w-full max-w-[100%] p-3 rounded-lg bg-gray-300"
             />
             {formik.errors && formik.errors.email && (
               <div className="text-red-500">{formik.errors.email}</div>
@@ -170,7 +170,7 @@ const Register = () => {
                 name="password"
                 value={formik.password}
                 onChange={formik.handleChange}
-                className="w-full max-w-[100%] p-3 rounded-lg"
+                className="w-full max-w-[100%] p-3 rounded-lg bg-gray-300"
               />
               <VisibilityIcon
                 className="absolute right-1 top-1/2 transform -translate-y-1/2 hover:cursor-pointer"
@@ -192,7 +192,7 @@ const Register = () => {
                 name="confirmPassword"
                 value={formik.confirmPassword}
                 onChange={formik.handleChange}
-                className="w-full max-w-[100%] p-3 rounded-lg"
+                className="w-full max-w-[100%] p-3 rounded-lg bg-gray-300"
               />
               <VisibilityIcon
                 className="absolute right-1 top-1/2 transform -translate-y-1/2 hover:cursor-pointer"
@@ -213,7 +213,7 @@ const Register = () => {
               name="phone"
               value={formik.phone}
               onChange={formik.handleChange}
-              className="w-full max-w-[100%] p-3 rounded-lg"
+              className="w-full max-w-[100%] p-3 rounded-lg bg-gray-300"
             />
 
             {formik.errors && formik.errors.phone && (
